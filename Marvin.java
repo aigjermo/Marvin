@@ -57,7 +57,7 @@ public class Marvin extends AdvancedRobot {
             long time = getTime();
             double r = getGunTurnRemainingRadians();
             double aimMargin = target.guessDistance(time)/100;
-            int threshold = 500;
+            int threshold = 85;
             if (getGunHeat() == 0 && r > aimMargin*-1 && r < aimMargin
                     && target.shotDifficulty() < threshold) {
                 setFire(Rules.MAX_BULLET_POWER); 
@@ -83,7 +83,7 @@ public class Marvin extends AdvancedRobot {
         // find enemy with highest pri
         for (EnemyBot e : enemies.values()) {
             e.updateTank(x, y, time, gunDir);
-            if (target == null || e.compareTo(target) > 100) {
+            if (target == null || e.compareTo(target) > 50) {
                 target = e;
             }
         }
@@ -91,7 +91,7 @@ public class Marvin extends AdvancedRobot {
         // turn gun towards him
         if (target != null) {
             long turnTime = target.guessTurnTime();
-            long shotTime = (long) (target.guessShotTime()+turnTime+1);
+            long shotTime = (long) (target.guessShotTime()+turnTime);
             double turn = Helper.calcRelativeBearing(
                     target.guessHeading(time + turnTime + shotTime), gunDir);
             setTurnGunRightRadians(turn);
@@ -112,7 +112,7 @@ public class Marvin extends AdvancedRobot {
             bearing = Helper.calcRelativeBearing(
                     target.guessHeading(getTime()), getHeadingRadians());
             bearing += Math.PI * Math.max(0,
-                    (1-(target.guessDistance(getTime())/200)));
+                    (1-(target.guessDistance(getTime())/250)));
         }
         else {
             bearing = Helper.calcRelativeBearing(
@@ -186,7 +186,7 @@ public class Marvin extends AdvancedRobot {
 
     public void onPaint(Graphics2D g) {
         for (EnemyBot e : enemies.values()) {
-            long shotTime = (long) (e.guessDistance(getTime()) / (20 - (3*3)));
+            long shotTime = (long) e.guessShotTime();
             e.getPos().paint(g, getTime(), shotTime, (e == target));
         }
     }

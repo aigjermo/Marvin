@@ -58,7 +58,7 @@ class Position {
 
         double dB = 11;
 
-        return dist / (dB - dDist);
+        return (dist / (dB - dDist)) + 1;
     }
 
     public double guessSpeed() {

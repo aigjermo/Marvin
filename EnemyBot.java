@@ -60,7 +60,7 @@ public class EnemyBot implements Comparable<EnemyBot> {
         double TDH = Helper.calcHeadingFromPosition(
                 posX, posY, pos.guessX(time+1), pos.guessY(time+1)) - TH;
 
-        double guess = (TH - gunDir) / (20 - TDH);
+        double guess = Math.ceil((TH - gunDir) / (20 - TDH));
         return (guess < 0) ? (int) guess * -1 : (int) guess;
     }
 
@@ -83,18 +83,14 @@ public class EnemyBot implements Comparable<EnemyBot> {
     public int priority() {
         
         return 1000 
-            - (int) guessDistance(time)
+            - (int) shotDifficulty()*10
             - 10*getAge()
             - 100*guessTurnTime();
     }
 
     public int shotDifficulty() {
 
-        if (energy <= 1)
-            return 0;
-
-        return (int) guessDistance(time)
-            + 20*getAge();
+        return (int) (guessShotTime() + 2*getAge());
     }
 
     public int compareTo(EnemyBot that) {
