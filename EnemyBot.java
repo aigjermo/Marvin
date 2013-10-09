@@ -1,4 +1,4 @@
-package g21;
+package aig;
 
 public class EnemyBot implements Comparable<EnemyBot> {
 
@@ -81,9 +81,9 @@ public class EnemyBot implements Comparable<EnemyBot> {
     }
 
     public int priority() {
-        
-        return 1000 
-            - (int) shotDifficulty()*10
+
+        return 1000
+            - shotDifficulty()*10
             - 10*getAge()
             - 100*guessTurnTime();
     }
@@ -94,7 +94,7 @@ public class EnemyBot implements Comparable<EnemyBot> {
     }
 
     public int compareTo(EnemyBot that) {
-        
+
         return this.priority() - that.priority();
     }
 

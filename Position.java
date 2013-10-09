@@ -1,7 +1,8 @@
-package g21;
+package aig;
 import java.util.Arrays;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.geom.Point2D;
 
 class Position {
 
@@ -24,7 +25,7 @@ class Position {
         T[2] = -1;
     }
 
-    public void update(double x, double y, double h, long time) {
+    public void update(Point2D pos, double h, long time) {
 
         int i = 3;
         while (--i > 0) {

@@ -1,4 +1,4 @@
-package g21;
+package aig;
 import java.lang.Math;
 
 public class Helper {

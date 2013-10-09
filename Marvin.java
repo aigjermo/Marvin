@@ -1,34 +1,41 @@
-package g21;
+package aig;
 import robocode.*;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.HashMap;
-import g21.*;
+import aig.*;
 
 /**
- * Marvin - a robot by ...
+ * Marvin - a robot by aig
  */
 public class Marvin extends AdvancedRobot {
 
     // variables
-    HashMap<String,EnemyBot> enemies = new HashMap<String,EnemyBot>();
-    EnemyBot target = null;
+    Target target = null;
     int direction = 1;
+    double x, y;
+    long t;
     double offset = 0;
     long shootTime = 0;
 
-	/**
-	 * run: IntelliBot's default behavior
-	 */
-	public void run() {
+    /**
+     * run: IntelliBot's default behavior
+     */
+    public void run() {
 
-		setColors(Color.black,Color.orange,Color.black);
+        setColors(Color.black,Color.orange,Color.black);
 
         // independent turret and radar
         setAdjustGunForRobotTurn(true);
         setAdjustRadarForGunTurn(true);
 
-		while(true) {
+        Grid.init(getBattleFieldWidth(), getBattleFieldHeight());
+
+        while(true) {
+
+            x = getX();
+            y = getY();
+            t = getTime();
 
             seek();
             target();
@@ -36,15 +43,15 @@ public class Marvin extends AdvancedRobot {
             drive();
 
             execute();
-		}
-	}
+        }
+    }
 
     /**
      * Seek: turn the radar to look for other robots
      */
     private void seek() {
 
-        if (getRadarTurnRemaining() < 10) 
+        if (getRadarTurnRemaining() < 10)
             setTurnRadarLeft(360);
     }
 
@@ -52,14 +59,12 @@ public class Marvin extends AdvancedRobot {
      * Shoot: Shoot at good opportunities
      */
     private void shoot() {
-        
+
         if (target != null) {
             long time = getTime();
             double r = getGunTurnRemainingRadians();
-            double aimMargin = target.guessDistance(time)/100;
-            int threshold = 85;
-            if (getGunHeat() == 0 && r > aimMargin*-1 && r < aimMargin
-                    && target.shotDifficulty() < threshold) {
+            double aimMargin = 0.05;
+            if (getGunHeat() == 0 && r > aimMargin*-1 && r < aimMargin) {
                 setFire(Rules.MAX_BULLET_POWER); 
             }
         }
@@ -75,18 +80,9 @@ public class Marvin extends AdvancedRobot {
         double y = getY();
         double gunDir = getGunHeadingRadians();
 
-        if (target != null && target.getAge() > 10) {
-            enemies.remove(target.getName());
-            target = null;
-        }
+        Target t = Grid.getPriorityTarget();
 
         // find enemy with highest pri
-        for (EnemyBot e : enemies.values()) {
-            e.updateTank(x, y, time, gunDir);
-            if (target == null || e.compareTo(target) > 50) {
-                target = e;
-            }
-        }
 
         // turn gun towards him
         if (target != null) {
@@ -112,7 +108,7 @@ public class Marvin extends AdvancedRobot {
             bearing = Helper.calcRelativeBearing(
                     target.guessHeading(getTime()), getHeadingRadians());
             bearing += Math.PI * Math.max(0,
-                    (1-(target.guessDistance(getTime())/250)));
+                    (1-(target.guessDistance(getTime()) / 500)));
         }
         else {
             bearing = Helper.calcRelativeBearing(
@@ -122,10 +118,10 @@ public class Marvin extends AdvancedRobot {
                         getBattleFieldHeight()/2),
                     getHeadingRadians());
         }
-        
+
         // turn
-        if (getTime() % 20 == 0) {
-            offset = (Math.random()-0.5)*(Math.PI/8);
+        if (getTime() % 6 == 0) {
+            offset = (Math.random()-0.5)*(Math.PI);
         }
         setTurnRightRadians(bearing + offset);
 
@@ -135,10 +131,10 @@ public class Marvin extends AdvancedRobot {
         setAhead(100*direction);
     }
 
-	/**
-	 * onScannedRobot: Update the battlefield map
-	 */
-	public void onScannedRobot(ScannedRobotEvent e) {
+    /**
+     * onScannedRobot: Update the battlefield map
+     */
+    public void onScannedRobot(ScannedRobotEvent e) {
 
         String name = e.getName();
 
@@ -159,15 +155,15 @@ public class Marvin extends AdvancedRobot {
 
         enemy.updateTarget(
                 x, y, e.getEnergy(), e.getHeadingRadians(), getTime());
-	}
+    }
 
-	/**
-	 * onHitByBullet: What to do when you're hit by a bullet
-	 */
-	public void onHitByBullet(HitByBulletEvent e) {
+    /**
+     * onHitByBullet: What to do when you're hit by a bullet
+     */
+    public void onHitByBullet(HitByBulletEvent e) {
         //direction *= -1;
         target = enemies.get(e.getName());
-	}
+    }
 
     /**
      * onHitWall: reverse for a few ticks
